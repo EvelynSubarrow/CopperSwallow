@@ -18,11 +18,12 @@ from flask import Flask, _app_ctx_stack
 from IronSwallowORM.models import *
 from util import query
 
+with open("config.json") as f:
+    config = json.load(f)
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://user:@/ironswallow_evelyn'
 
-engine = sqlalchemy.create_engine('postgresql+psycopg2://user:@/ironswallow_evelyn', echo=True)
+engine = sqlalchemy.create_engine(config["database-string"], echo=True)
 
 session_local = sqlalchemy.orm.sessionmaker(autocommit=False, autoflush=False, bind=engine)
 app.session = sqlalchemy.orm.scoped_session(session_local, scopefunc=_app_ctx_stack.__ident_func__)
@@ -218,8 +219,7 @@ def redirect_location():
 if __name__ == "__main__":
     app.logger.setLevel(logging.ERROR)
 
-    with open("config.json") as f:
-        config = json.load(f)
+
 
     try:
         # Super sneaky side module to do nefarious things
