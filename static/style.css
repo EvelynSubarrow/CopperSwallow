@@ -138,7 +138,7 @@ th {
 }
 
 tr.primaryrow:nth-child(odd) {
-    background: #04000f;
+    /*background: #04000f80;*/
 }
 
 tr.primaryrow:hover {
