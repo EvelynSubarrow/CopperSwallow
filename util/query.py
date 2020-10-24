@@ -19,7 +19,7 @@ def json_default(value) -> str:
         raise ValueError(type(value))
 
 
-def station_board(location: str, query_dt=None, period: int = 480, intermediate_tiploc=None, passenger_only=True) -> dict:
+def station_board(location: str, query_dt=None, period: int = 480, limit: int = 50, intermediate_tiploc=None, passenger_only=True) -> dict:
     location = location.upper()
     out = OrderedDict()
 
@@ -42,7 +42,7 @@ def station_board(location: str, query_dt=None, period: int = 480, intermediate_
         DarwinScheduleLocation.wtd > query_dt,
         DarwinScheduleLocation.wtd < query_dt_last,
         DarwinSchedule.is_deleted == False
-    ).order_by(DarwinScheduleLocation.wtd)]
+    ).order_by(DarwinScheduleLocation.wtd).limit(limit)]
 
     return out
 
