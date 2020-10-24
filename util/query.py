@@ -37,7 +37,7 @@ def station_board(location: str, query_dt=None, period: int = 480, intermediate_
     out["services"] = [a.serialise(True) for a in app.app.session.query(DarwinScheduleLocation).join(DarwinScheduleLocation.schedule).options(
         sqlalchemy.orm.joinedload(DarwinScheduleLocation.schedule)).filter(
         DarwinScheduleLocation.wtd is not None,
-        DarwinScheduleLocation.tiploc == location,
+        DarwinScheduleLocation.tiploc.in_(list(out["locations"].keys())),
         DarwinScheduleLocation.loc_type != "PP",
         DarwinScheduleLocation.wtd > query_dt,
         DarwinScheduleLocation.wtd < query_dt_last,
