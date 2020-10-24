@@ -81,7 +81,7 @@ def json_departures(location, time):
         else:
             time = datetime.datetime.strptime(time, "%Y-%m-%dT%H:%M:%S")
 
-            response = query.station_board(location, time, period=500)
+        response = query.station_board(location, time, period=500)
 
 
         if response:
