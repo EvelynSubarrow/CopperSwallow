@@ -72,9 +72,11 @@
                                 <span class="category">{{ association["category"] }}</span>
                                 <span class="rid"><a href="/s/{{ association["assoc"]["rid"] }}">{{ association["assoc"]["rid"] }}</a></span>
                                 <span class="assoc_direction">{{ association["from"]*"←" or "→" }}</span>
-                                <span class="tiploc">{{ association["assoc"]["there"]["tiploc"] }}</span>
-                                <span class="crs">{{ association["assoc"]["there"]["crs_darwin"] or ''}}</span>
-                                <span class="locname">{{ association["assoc"]["there"]["name_full"] }}</span>
+                                {% for there in association["there"] %}
+                                <span class="tiploc">{{ there["tiploc"] }}</span>
+                                <span class="crs">{{ there["crs_darwin"] or ''}}</span>
+                                <span class="locname">{{ there["name_full"] }}</span>
+                                {% endfor %}
                             </li>
                         {% endfor  %}
                         </ul>
