@@ -58,5 +58,5 @@ def service(sid, date=None) -> dict:
 
 def last_retrieved() -> Optional[datetime.datetime]:
     result = app.app.session.query(LastReceivedSequence)
-    if result:
+    if result.count():
         return result[0].time_acquired

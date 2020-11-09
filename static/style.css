@@ -142,7 +142,7 @@ tr.primaryrow:nth-child(odd) {
 }
 
 tr.primaryrow:hover {
-    background: #08080f;
+    background: #404050A0;
 }
 
 .headrow {
