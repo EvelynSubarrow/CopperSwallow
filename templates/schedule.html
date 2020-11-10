@@ -28,6 +28,50 @@
             {%- endfor -%}
             </section>
         {%- endif -%}
+            <section>
+                <h1>Service outline</h1>
+                <table class="collapse">
+                    <tr class="headrow">
+                        <th>UID</th>
+                        <th>SSD</th>
+                        <th>RSID</th>
+                        <th>Head</th>
+
+                        <th class="borderleft">Category</th>
+                        <th class="borderright">Operator</th>
+
+                        <th class="borderleft">Origins</th>
+                        <th class="borderright">Destinations</th>
+                    </tr>
+                    <tr class="primaryrow">
+                    <td data-title="uid"  class="uid borderleft"><a href="/s/{{schedule["uid"]}}/{{schedule["ssd"]}}">{{ schedule["uid"] }}</a></td>
+                    <td data-title="ssd"  class="ssd">{{ schedule["ssd"] }}</td>
+                    <td data-title="rsid" class="rsid">{{ schedule["rsid"] }}</td>
+                    <td data-title="head">{{ schedule["signalling_id"] or '' }}</td>
+                    <td data-title="cat.">{{ schedule["category"] }}</td>
+                    <td data-title="op.">{{ schedule["operator"] }}</td>
+
+                    <td class="flex-break"></td>
+
+                    <td class="origin borderleft">
+                        <ul class="associations">
+                        {%- for origin in schedule["origins"] -%}
+                                <li class="{{origin["source"]}} {{"cancelled" if origin["cancelled"] else ''}}">{{origin["name_full"]}}</li>
+                        {%- endfor -%}
+                        </ul>
+                    </td>
+                    <td class="destination borderright">
+                        <ul class="associations">
+                        {%- for destination in schedule["destinations"] -%}
+                                <li class="{{destination["source"]}} {{"cancelled" if destination["cancelled"] else ''}}"><a href="/d/{{destination["tiploc"]}}">{{destination["name_full"]}}</a></li>
+                        {%- endfor -%}
+                        </ul>
+                    </td>
+                    </tr>
+                </table>
+            </section>
+            <section>
+            <h1>Locations</h1>
             <table class="collapse">
                 <tr class="headrow">
                     <th colspan="5" class="headgroup"></th>
@@ -85,5 +129,6 @@
             {%- endif -%}
             {% endfor %}
             </table>
+            </section>
         {% endif -%}
 {% endblock %}

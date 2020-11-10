@@ -326,8 +326,10 @@ a:hover, a:active {
     .sched { color:#668; }
 
     .collapse .origin,.collapse .destination {
-        flex-basis:100%;
-        width:100%;
+        flex: 1 0 45%;
+        /*width:100%;*/
+        max-width:50%;
+        min-width:40%;
     }
 
     .locname {
