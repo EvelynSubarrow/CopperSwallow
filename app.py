@@ -25,8 +25,6 @@ app = Flask(__name__)
 
 engine = sqlalchemy.create_engine(config["database-string"], echo=config.get("echo-sql", False))
 
-create_all(engine)
-
 session_local = sqlalchemy.orm.sessionmaker(autocommit=False, autoflush=False, bind=engine)
 app.session = sqlalchemy.orm.scoped_session(session_local, scopefunc=_app_ctx_stack.__ident_func__)
 
