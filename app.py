@@ -212,7 +212,7 @@ def redirect_schedule():
 @app.route("/redirect/location")
 def redirect_location():
     code = request.args.get("code", '')
-    time = request.args.get("time", '')
+    time = request.args.get("time", 'now')
     return flask.redirect(flask.url_for("html_location", location=code, time=time))
 
 
