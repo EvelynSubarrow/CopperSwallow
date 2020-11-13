@@ -228,7 +228,7 @@ if __name__ == "__main__":
         pass
 
     app.run(
-        config.get("flask-host", "127.0.0.1"),
+        config.get("flask-host", "0.0.0.0"),
         config.get("flask-port", 36323),
         config.get("flask-debug", False),
         ssl_context=None)
