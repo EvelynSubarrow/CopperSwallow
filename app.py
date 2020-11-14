@@ -24,9 +24,15 @@ with open("config.json") as f:
 app = Flask(__name__)
 
 engine = sqlalchemy.create_engine(config["database-string"], echo=config.get("echo-sql", False))
-
-session_local = sqlalchemy.orm.sessionmaker(autocommit=False, autoflush=False, bind=engine)
+session_local = sqlalchemy.orm.sessionmaker(autocommit=True, autoflush=True, bind=engine)
 app.session = sqlalchemy.orm.scoped_session(session_local, scopefunc=_app_ctx_stack.__ident_func__)
+
+def no(*args, **kwargs):
+    return
+
+# Monkeypatch our autocommitting autoflushing session to do nothing with that
+
+app.session.flush = no
 
 
 class UnauthenticatedException(Exception): pass
