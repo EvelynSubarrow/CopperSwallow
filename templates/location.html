@@ -28,12 +28,14 @@
                 <table>
                     <tr class="headrow">
                         <th class="borderleft">TIPLOC</th>
+                        <th>Category</th>
                         <th>CRS</th>
                         <th class="borderright">Name</th>
                     </tr>
                     {% for location in board["locations"].values() %}
-                    <tr>
+                    <tr class="{{ "cancelled "*(location["location_category"]=="Z")}}">
                         <td class="tiploc borderleft">{{ location["tiploc"] }}</td>
+                        <td class="loc_category">{{ location["location_category"] }}</td>
                         <td class="crs">{{ location["crs_darwin"] or '' }}</td>
                         <td class="locname borderright">{{ location["name_full"] }}</td>
                     </tr>
