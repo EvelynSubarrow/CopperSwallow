@@ -63,15 +63,62 @@ def format_time(dt, part):
 
 @app.route('/')
 def index():
-    return flask.render_template('index.html')
+    return flask.render_template('index.html', locations=app.session.query(DarwinLocation).filter(DarwinLocation.category.in_("SMBF")))
+
+
+@app.route("/j/debug/<subsystem>")
+def debug_json(subsystem):
+    return Response(json.dumps([a.serialise() for a in app.session.query(SwallowDebug).filter(SwallowDebug.subsystem==subsystem)], indent=2, default=query.json_default), mimetype="application/json", status=200)
+
+
+@app.route('/debug/<subsystem>')
+def debug(subsystem):
+    like = request.args.get("search", '', type=str)
+    query = app.session.query(SwallowDebug).filter(SwallowDebug.subsystem==subsystem)
+    if like:
+        query = query.filter(SwallowDebug.disambiguation.like(like + "%"))
+
+    return flask.render_template('debug.html', entries=query)
+
+
+
+@app.route('/location')
+def locations():
+    category = request.args.get("category", 'SBFM').upper()[:5]
+    match = request.args.get("non_match", False, type=bool)
+    disambiguation = request.args.get("disambiguate", False, type=bool)
+    like = request.args.get("search", '', type=str)
+
+    query = app.session.query(DarwinLocation).order_by(DarwinLocation.tiploc.asc())
+    if category:
+        query = query.filter(DarwinLocation.category.in_(category))
+    if disambiguation:
+        query = query.filter()
+    if like:
+        query = query.filter(DarwinLocation.name_full.like(like + "%"))
+    if match:
+        query = query.filter(DarwinLocation.name_darwin != DarwinLocation.name_full)
+        query = [a for a in query if a.name_darwin.replace(" ", "").replace("-","").replace(".", "").upper()!=a.name_full.replace(" ", "").replace("-", "").replace(".", "").upper()]
+
+    return flask.render_template('location_search.html', locations=query)
+
+
+@app.route('/location/<location>')
+def location(location):
+    query = app.session.query(DarwinLocation).filter(DarwinLocation.tiploc==location)
+
+    return flask.render_template("location_nonboard.html", location=query[0])
+
 
 @app.route('/style')
 def style():
     return app.send_static_file('style.css')
 
+
 @app.route('/swallow')
 def swallow():
     return app.send_static_file('swallow.svg')
+
 
 @app.route('/json/departures/<location>', defaults={"time": "now"})
 @app.route('/json/departures/<location>/<time>')
@@ -224,8 +271,6 @@ def redirect_location():
 
 if __name__ == "__main__":
     app.logger.setLevel(logging.ERROR)
-
-
 
     try:
         # Super sneaky side module to do nefarious things

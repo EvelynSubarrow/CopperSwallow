@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block title %}Location debug list{% endblock %}
+{% block content %}
+    <section>
+        <h1>Locations</h1>
+        <table>
+            <tr class="headrow">
+                <th class="borderleft">TIPLOC</th>
+                <th>Operator</th>
+                <th>Category</th>
+                <th>CRS</th>
+                <th class="borderright">Name (full norm.)</th>
+                <th class="borderright">Name (Darwin)</th>
+            </tr>
+            {% for location in locations %}
+            <tr>
+                <td class="tiploc borderleft">{{ location.tiploc }}</td>
+                <td class="operator">{{ location.operator or '' }}</td>
+                <td class="loc_category">{{ location.category or '' }} </td>
+                <td class="crs">{{ location.crs_darwin or '' }}</td>
+                <td class="origin borderright">{{ location.name_full or '' }}</td>
+                <td class="destination borderright">{{ location.name_darwin or ''}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </section>
+{% endblock %}

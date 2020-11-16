@@ -13,4 +13,20 @@
                     <input type="submit" value="Trains" />
                 </form>
                 </section>
+                <section>
+                    <table>
+                        <tr class="headrow">
+                            <th class="borderleft">TIPLOC</th>
+                            <th>CRS</th>
+                            <th class="borderright">Name</th>
+                        </tr>
+                    {% for location in locations %}
+                    <tr>
+                        <td class="tiploc borderleft">{{ location.tiploc }}</td>
+                        <td class="crs">{{ location.crs_darwin or '' }}</td>
+                        <td class="locname borderright">{{ location.name_short or '' }}</td>
+                    </tr>
+                    {% endfor %}
+                    </table>
+                </section>
 {% endblock %}

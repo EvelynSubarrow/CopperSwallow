@@ -201,7 +201,7 @@ ul.associations {
 /* Outline table */
 .uid      { min-width: 6ch;  }
 .stp      { width: 3ch;  }
-.operator { width: 100%; }
+.operator { width: 2ch; }
 
 /* Location only */
 .as-required { font-style: italic; }

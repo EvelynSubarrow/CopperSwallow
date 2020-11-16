@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block title %}Location debug list{% endblock %}
+{% block content %}
+    <section>
+        <h1>Locations</h1>
+        <table>
+            <tr class="headrow">
+                <th class="borderleft">subsystem</th>
+                <th>subkey</th>
+                <th>disambiguation</th>
+                <th>updated</th>
+                <th class="borderright">content</th>
+            </tr>
+            {% for entry in entries %}
+            <tr>
+                <td class="borderleft">{{ entry.subsystem }}</td>
+                <td class="">{{ entry.subkey }}</td>
+                <td class="">{{ entry.disambiguation }} </td>
+                <td class="borderright">{{ entry.updated_at }}</td>
+                <td class="borderright">{{ entry.content }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </section>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+{% block title %}{{ location.tiploc + " " + location.name_full }}{% endblock %}
+{% block content %}
+        {%- if message -%}
+            <section class="message">{{message}}</section>
+        {%- endif -%}
+        {%- if notes -%}
+            <section>
+                <h1>Query messages</h1>
+            {%- for note in notes -%}
+                <div class="note">{{ note }}</div>
+            {%- endfor -%}
+            </section>
+        {% endif %}
+            <section>
+                <h1>Location</h1>
+                <table>
+                    <tr class="headrow">
+                        <th class="borderleft">TIPLOC</th>
+                        <th>Category</th>
+                        <th>CRS</th>
+                        <th class="borderright">Name</th>
+                    </tr>
+                    <tr class="{{ "cancelled "*(location.category=="Z")}}">
+                        <td class="tiploc borderleft">{{ location.tiploc }}</td>
+                        <td class="loc_category">{{ location.category }}</td>
+                        <td class="crs">{{ location.crs_darwin or '' }}</td>
+                        <td class="locname borderright">{{ location.name_full }}</td>
+                    </tr>
+                </table>
+            </section>
+            <section>
+                <h1>Pathing</h1>
+                <table>
+                    <tr class="headrow">
+                        <th class="borderleft">Origin TL</th>
+                        <th>Dest TL</th>
+                        <th>Running line</th>
+                        <th>Description</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Distance</th>
+                        <th>Reversible</th>
+                        <th>Power</th>
+                        <th class="borderright">R.A.</th>
+                    </tr>
+                    {%- for path in location.lines -%}
+                    <tr>
+                        <td><a href="/location/{{ path.origin }}">{{ path.origin }}</a></td>
+                        <td><a href="/location/{{ path.destination }}">{{ path.destination }}</a></td>
+                        <td>{{ path.running_line_code }}</td>
+                        <td>{{ path.running_line_desc or '' }}</td>
+                        <td>{{ path.start_date or '' }}</td>
+                        <td>{{ path.end_date or '' }}</td>
+                        <td>{{ path.distance }}</td>
+                        <td>{{ path.reversible }}</td>
+                        <td>{{ path.power }}</td>
+                        <td>{{ path.route_allowance }}</td>
+                    </tr>
+                    {%- endfor -%}
+                </table>
+            </section>
+{% endblock %}
