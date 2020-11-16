@@ -30,7 +30,8 @@
                 </table>
             </section>
             <section>
-                <h1>Pathing</h1>
+                <h1>BPLAN - Pathing</h1>
+                <i>Link distances may not be accurate.</i>
                 <table>
                     <tr class="headrow">
                         <th class="borderleft">Origin TL</th>
@@ -46,7 +47,7 @@
                     </tr>
                     {%- for path in location.lines -%}
                     <tr>
-                        <td><a href="/location/{{ path.origin }}">{{ path.origin }}</a></td>
+                        <td class="borderleft"><a href="/location/{{ path.origin }}">{{ path.origin }}</a></td>
                         <td><a href="/location/{{ path.destination }}">{{ path.destination }}</a></td>
                         <td>{{ path.running_line_code }}</td>
                         <td>{{ path.running_line_desc or '' }}</td>
@@ -55,7 +56,29 @@
                         <td>{{ path.distance }}</td>
                         <td>{{ path.reversible }}</td>
                         <td>{{ path.power }}</td>
-                        <td>{{ path.route_allowance }}</td>
+                        <td class="borderright">{{ path.route_allowance }}</td>
+                    </tr>
+                    {%- endfor -%}
+                </table>
+            </section>
+           <section>
+                <h1>BPLAN - Platforms</h1>
+               <i>These are often incomplete. Platform/siding lengths may not be accurate.</i>
+                <table>
+                    <tr class="headrow">
+                        <th class="borderleft">Platform</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Length</th>
+                        <th class="borderright">Power</th>
+                    </tr>
+                    {%- for path in location.platforms -%}
+                    <tr>
+                        <td class="borderleft">{{ path.platform or '' }}</td>
+                        <td>{{ path.start_date or '' }}</td>
+                        <td>{{ path.end_date or '' }}</td>
+                        <td>{{ path.length or '' }}</td>
+                        <td class="borderright">{{ path.power }}</td>
                     </tr>
                     {%- endfor -%}
                 </table>
