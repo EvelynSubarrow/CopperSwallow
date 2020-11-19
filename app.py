@@ -64,7 +64,8 @@ def format_time(dt, part):
 
 @app.route('/')
 def index():
-    return flask.render_template('index.html', locations=app.session.query(DarwinLocation).filter(DarwinLocation.category.in_("SMBF")))
+    return flask.render_template('index.html', operators=operator_categories(),
+                    lc=LocalisationSelector(app.session, request), category="SMBF")
 
 
 @app.route("/j/debug/<subsystem>")
@@ -84,6 +85,17 @@ def debug(subsystem):
 
 def strip_location_name(name):
     return name.upper().replace("LONDON", "").replace("GLASGOW", "").replace(" ", "").replace("-","").replace(".", "")
+
+
+def operator_categories():
+    # TODO: make categories part of DB, don't do this
+    operator_cats = OrderedDict()
+    operators = sorted(app.session.query(DarwinOperator).order_by(DarwinOperator.operator), key=lambda x: x.category(), reverse=True)
+    for operator in operators:
+        operator_cats[operator.category()] = operator_cats.get(operator.category(), [])
+        operator_cats[operator.category()].append(operator)
+
+    return operator_cats
 
 
 @app.route('/location')
@@ -117,15 +129,8 @@ def locations():
         query = query.filter(DarwinLocation.name_darwin != DarwinLocation.name_full)
         query = [a for a in query if strip_location_name(a.name_darwin) != strip_location_name(a.name_full)]
 
-    # TODO: make categories part of DB, don't do this
-    operator_cats = OrderedDict()
-    operators = sorted(app.session.query(DarwinOperator).order_by(DarwinOperator.operator), key=lambda x: x.category(), reverse=True)
-    for operator in operators:
-        operator_cats[operator.category()] = operator_cats.get(operator.category(), [])
-        operator_cats[operator.category()].append(operator)
 
-
-    return flask.render_template('location_search.html', locations=query, operators=operator_cats,
+    return flask.render_template('location_search.html', locations=query, operators=operator_categories(),
                         lc=LocalisationSelector(app.session, request),
                         args_operator=args_operator, category=category, search=search)
 

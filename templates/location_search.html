@@ -1,29 +1,7 @@
 {% extends "layout.html" %}
 {% block title %}Location search{% endblock %}
 {% block content %}
-    <section class="scheduleform">
-        <form action="/location" method="get" onsubmit="disableEmpty(this)">
-            <input type="text" name="search" placeholder="Name" minlength="1" maxlength="30" value="{{ search }}" />
-            <select name="operator">
-                <optgroup label="{{ lc.get_term("dropdown_groups") }}">
-                    <option value="">{{ lc.get_term("dropdown_any") }}</option>
-                </optgroup>
-                {% for category, operator_entries in operators.items() %}
-                    <optgroup label="{{ lc.get_is("OPCAT", category) }}">
-                    {% for operator in operator_entries %}
-                        <option value="{{ operator.operator }}" {{ "selected" if operator.operator==args_operator }}>{{ operator.operator }} - {{ operator.operator_name }}</option>
-                    {% endfor %}
-                    </optgroup>
-                {% endfor %}
-            </select>
-            <select name="category" multiple="multiple" size="{{ lc.get_list("IS", "LCAT") |length }}">
-                {% for code, desc in lc.get_list("IS", "LCAT") %}
-                    <option value="{{ code }}" {{ "selected"*(code in category) }}>{{code}} - {{desc}}</option>
-                {% endfor %}
-            </select>
-            <input type="submit" value="{{ lc.get_term("search") }}" />
-        </form>
-    </section>
+    {% include "meta/search_form.html" %}
     <section>
         <h1>Locations</h1>
         <table>
