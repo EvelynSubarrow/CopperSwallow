@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block title %}/{% endblock %}
 {% block content_outer %}
-                <section class="scheduleform">
+                <section class="inlineform">
                 <form action="/redirect/schedule" method="get">
                     <input type="text" name="uid" placeholder="UID" minlength="5" maxlength="6" pattern="[A-Z]\d{5}|\d{5}" required />
                     <input type="text" name="date" placeholder="yyyy-mm-dd" minlength="10" pattern="2\d{3}-(0\d|1[012])-([012]\d|3[01])" required />

@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
 
 import logging, json
-import datetime
+from collections import defaultdict
 
-
-import psycopg2
+from operator import or_
 
 import flask
 from flask import Response
 from flask import request
-
-import sqlalchemy, sqlalchemy.orm
-
 from flask import Flask, _app_ctx_stack
 
+import sqlalchemy.orm
 
 from IronSwallowORM.models import *
-from util import query
+
+
+from util.locale import LocalisationSelector
+from util import query, locale
 
 with open("config.json") as f:
     config = json.load(f)
@@ -27,11 +27,12 @@ engine = sqlalchemy.create_engine(config["database-string"], echo=config.get("ec
 session_local = sqlalchemy.orm.sessionmaker(autocommit=True, autoflush=True, bind=engine)
 app.session = sqlalchemy.orm.scoped_session(session_local, scopefunc=_app_ctx_stack.__ident_func__)
 
+locale.setup_copperswallow_strings(app.session)
+
 def no(*args, **kwargs):
     return
 
 # Monkeypatch our autocommitting autoflushing session to do nothing with that
-
 app.session.flush = no
 
 
@@ -81,26 +82,52 @@ def debug(subsystem):
     return flask.render_template('debug.html', entries=query)
 
 
+def strip_location_name(name):
+    return name.upper().replace("LONDON", "").replace("GLASGOW", "").replace(" ", "").replace("-","").replace(".", "")
+
 
 @app.route('/location')
 def locations():
-    category = request.args.get("category", 'SBFM').upper()[:5]
+    category = "".join(request.args.getlist("category", type=str)) or "SFBM"
     match = request.args.get("non_match", False, type=bool)
     disambiguation = request.args.get("disambiguate", False, type=bool)
-    like = request.args.get("search", '', type=str)
+    search = request.args.get("search", '', type=str)
+    args_operator = request.args.get("operator", '', type=str)
 
     query = app.session.query(DarwinLocation).order_by(DarwinLocation.tiploc.asc())
     if category:
         query = query.filter(DarwinLocation.category.in_(category))
+
     if disambiguation:
-        query = query.filter()
-    if like:
-        query = query.filter(DarwinLocation.name_full.like(like + "%"))
+        stations_by_crs = defaultdict(list)
+        q2 = app.session.query(DarwinLocation).filter(DarwinLocation.crs_darwin!=None)
+        for station in q2:
+            stations_by_crs[station.crs_darwin].append(station)
+        station_dups = [k for k, v in stations_by_crs.items() if len(v) > 1]
+
+        query = query.filter(DarwinLocation.crs_darwin.in_(station_dups)).order_by(DarwinLocation.crs_darwin.asc())
+    else:
+        query = query.order_by(DarwinLocation.tiploc.asc())
+
+    if search:
+        query = query.filter(or_(DarwinLocation.name_full.ilike(search + "%"), DarwinLocation.name_darwin.ilike(search + "%")))
+    if args_operator:
+        query = query.filter(DarwinLocation.operator == args_operator)
     if match:
         query = query.filter(DarwinLocation.name_darwin != DarwinLocation.name_full)
-        query = [a for a in query if a.name_darwin.replace(" ", "").replace("-","").replace(".", "").upper()!=a.name_full.replace(" ", "").replace("-", "").replace(".", "").upper()]
+        query = [a for a in query if strip_location_name(a.name_darwin) != strip_location_name(a.name_full)]
 
-    return flask.render_template('location_search.html', locations=query)
+    # TODO: make categories part of DB, don't do this
+    operator_cats = OrderedDict()
+    operators = sorted(app.session.query(DarwinOperator).order_by(DarwinOperator.operator), key=lambda x: x.category(), reverse=True)
+    for operator in operators:
+        operator_cats[operator.category()] = operator_cats.get(operator.category(), [])
+        operator_cats[operator.category()].append(operator)
+
+
+    return flask.render_template('location_search.html', locations=query, operators=operator_cats,
+                        lc=LocalisationSelector(app.session, request),
+                        args_operator=args_operator, category=category, search=search)
 
 
 @app.route('/location/<location>')
@@ -119,6 +146,9 @@ def style():
 def swallow():
     return app.send_static_file('swallow.svg')
 
+@app.route('/main.js')
+def main_js():
+    return app.send_static_file('main.js')
 
 @app.route('/json/departures/<location>', defaults={"time": "now"})
 @app.route('/json/departures/<location>/<time>')

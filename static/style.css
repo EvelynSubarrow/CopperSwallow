@@ -41,7 +41,7 @@ header,footer {
 
 /* input and so on */
 
-.scheduleform {
+.inlineform {
     margin-left: auto;
     margin-right: auto;
     display: inline-block;
