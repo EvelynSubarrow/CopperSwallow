@@ -16,8 +16,13 @@
             </tr>
             {% for location in locations %}
             <tr>
-                <td class="tiploc borderleft">{{ location.tiploc }}</td>
-                <td class="crs">{{ location.crs_darwin or '' }}</td>
+                <td class="tiploc borderleft">
+                    <span class="microlinks"><span class="microlink"><a href="/location/{{location.tiploc}}/arrivals">←</a></span><span class="microlink"><a href="/location/{{location.tiploc}}">.</a></span><span class="microlink"><a href="/location/{{location.tiploc}}/departures">→</a></span></span>
+                    {{location.tiploc}}
+                </td>
+                <td class="crs">
+                    <span class="microlinks"><span class="microlink"><a href="/location/{{location.crs_darwin}}/arrivals">←</a></span><span class="microlink"><a href="/location/{{location.crs_darwin}}/departures">→</a></span></span>
+                    {{ location.crs_darwin or '' }}</td>
                 <td class="operator">{{ location.operator or '' }}</td>
                 <td class="loc_category">{{ location.category or '' }} </td>
                 <td class="origin borderleft">{{ location.name_full or '' }}</td>

@@ -19,7 +19,7 @@ def json_default(value) -> str:
         raise ValueError(type(value))
 
 
-def station_board(location: str, query_dt=None, period: int = 480, limit: int = 50, intermediate_tiploc=None, passenger_only=True) -> dict:
+def station_board(location: str, query_dt=None, period: int = 480, limit: int = 50, intermediate_tiploc=None, passenger_only=True, arrivals=False) -> dict:
     location = location.upper()
     out = OrderedDict()
 
@@ -34,15 +34,26 @@ def station_board(location: str, query_dt=None, period: int = 480, limit: int = 
 
     out["messages"] = [a.serialise(False) for a in app.app.session.query(DarwinMessage).filter(DarwinMessage.stations.any(singular_crs))]
 
-    out["services"] = [a.serialise(True) for a in app.app.session.query(DarwinScheduleLocation).join(DarwinScheduleLocation.schedule).options(
+    query = app.app.session.query(DarwinScheduleLocation).join(DarwinScheduleLocation.schedule).options(
         sqlalchemy.orm.joinedload(DarwinScheduleLocation.schedule)).filter(
-        DarwinScheduleLocation.wtd is not None,
-        DarwinScheduleLocation.tiploc.in_(list(out["locations"].keys())),
-        DarwinScheduleLocation.loc_type != "PP",
-        DarwinScheduleLocation.wtd > query_dt,
-        DarwinScheduleLocation.wtd < query_dt_last,
-        DarwinSchedule.is_deleted == False
-    ).order_by(DarwinScheduleLocation.wtd).limit(limit)]
+        DarwinSchedule.is_deleted == False)
+
+    if arrivals:
+        query = query.filter(DarwinScheduleLocation.wta is not None,
+                             DarwinScheduleLocation.tiploc.in_(list(out["locations"].keys())),
+                             DarwinScheduleLocation.loc_type != "PP",
+                             DarwinScheduleLocation.wta > query_dt,
+                             DarwinScheduleLocation.wta < query_dt_last,
+                             ).order_by(DarwinScheduleLocation.wta).limit(limit)
+    else:
+        query = query.filter(DarwinScheduleLocation.wtd is not None,
+                            DarwinScheduleLocation.tiploc.in_(list(out["locations"].keys())),
+                            DarwinScheduleLocation.loc_type != "PP",
+                            DarwinScheduleLocation.wtd > query_dt,
+                            DarwinScheduleLocation.wtd < query_dt_last,
+                            ).order_by(DarwinScheduleLocation.wtd).limit(limit)
+
+    out["services"] = [a.serialise(True) for a in query]
 
     return out
 

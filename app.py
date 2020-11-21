@@ -88,12 +88,11 @@ def strip_location_name(name):
 
 
 def operator_categories():
-    # TODO: make categories part of DB, don't do this
     operator_cats = OrderedDict()
-    operators = sorted(app.session.query(DarwinOperator).order_by(DarwinOperator.operator), key=lambda x: x.category(), reverse=True)
+    operators = app.session.query(DarwinOperator).order_by(DarwinOperator.category.desc()).order_by(DarwinOperator.operator)
     for operator in operators:
-        operator_cats[operator.category()] = operator_cats.get(operator.category(), [])
-        operator_cats[operator.category()].append(operator)
+        operator_cats[operator.category] = operator_cats.get(operator.category, [])
+        operator_cats[operator.category].append(operator)
 
     return operator_cats
 
@@ -122,7 +121,7 @@ def locations():
         query = query.order_by(DarwinLocation.tiploc.asc())
 
     if search:
-        query = query.filter(or_(DarwinLocation.name_full.ilike(search + "%"), DarwinLocation.name_darwin.ilike(search + "%")))
+        query = query.filter(or_(DarwinLocation.name_full.ilike("%" + search + "%"), DarwinLocation.name_darwin.ilike("%" + search + "%")))
     if args_operator:
         query = query.filter(DarwinLocation.operator == args_operator)
     if match:
@@ -207,16 +206,17 @@ def json_service(id, date):
     except ValueError as e:
         logging.exception(e)
         status, failure_message = 400, "/<rid> requires a valid RID, /<uid>/<date> requires a valid UID, and a ISO 8601 date, or 'now'"
-    except Exception as e:
-        logging.exception(e)
-        if not failure_message:
-            status, failure_message = 500, "Unhandled exception"
+
     return Response(json.dumps({"status": status, "message":failure_message}, indent=2), mimetype="application/json", status=status)
+
 
 @app.route('/departures/<location>', defaults={"time": "now"})
 @app.route('/departures/<location>/<time>')
 @app.route('/d/<location>', defaults={"time": "now"})
 @app.route('/d/<location>/<time>')
+
+@app.route('/location/<location>/departures', defaults={"time": "now"})
+@app.route('/location/<location>/departures/<time>')
 def html_location(location, time):
     try:
         if not location.isalnum(): raise ValueError
@@ -240,12 +240,40 @@ def html_location(location, time):
     except ValueError as e:
         logging.exception(e)
         return error_page(400, "Location names must be alphanumeric, datestamp must be either ISO 8601 format (YYYY-MM-DDThh:mm:ss) or 'now'")
-    except UnauthenticatedException as e:
+
+    return Response(
+        flask.render_template("location.html", board=board, time=time, location=location, message=None,
+                              notes=notes, format_time=format_time),
+        status=200,
+        mimetype="text/html"
+    )
+
+
+@app.route('/location/<location>/arrivals', defaults={"time": "now"})
+@app.route('/location/<location>/arrivals/<time>')
+def html_arrivals(location, time):
+    try:
+        if not location.isalnum(): raise ValueError
+
+        notes = []
+
+        if time == "now":
+            time = datetime.datetime.now()
+            notes.append("Departures are for time of request")
+        else:
+            time = datetime.datetime.strptime(time, "%Y-%m-%dT%H:%M:%S")
+
+        last_retrieved = query.last_retrieved()
+        if not last_retrieved or (datetime.datetime.utcnow()-last_retrieved).seconds > 300:
+            notes.append("Last Darwin message was parsed more than five minutes ago, information is likely out of date.")
+
+        board = query.station_board(location, time, arrivals=True)
+        if not board:
+            return error_page(404, "No such location code is known")
+
+    except ValueError as e:
         logging.exception(e)
-        return error_page(403, "Unauthenticated")
-    except Exception as e:
-        logging.exception(e)
-        return error_page(500, "Unhandled exception")
+        return error_page(400, "Location names must be alphanumeric, datestamp must be either ISO 8601 format (YYYY-MM-DDThh:mm:ss) or 'now'")
 
     return Response(
         flask.render_template("location.html", board=board, time=time, location=location, message=None,
