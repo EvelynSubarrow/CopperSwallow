@@ -40,6 +40,8 @@
                         <th class="borderleft">Category</th>
                         <th class="borderright">Operator</th>
 
+                        <th class="borderleft borderright">Formation</th>
+
                         <th class="borderleft">Origins</th>
                         <th class="borderright">Destinations</th>
                     </tr>
@@ -50,6 +52,7 @@
                     <td data-title="head">{{ schedule["signalling_id"] or '' }}</td>
                     <td data-title="cat.">{{ schedule["category"] }}</td>
                     <td data-title="op.">{{ schedule["operator"] }}</td>
+                    <td>{{ schedule["formation_summary"] or ''}}</td>
 
                     <td class="flex-break"></td>
 
