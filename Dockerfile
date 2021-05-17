@@ -10,4 +10,4 @@ RUN pip3 install -r /tmp/requirements.txt
 WORKDIR /opt/copperswallow/
 COPY . ./
 EXPOSE 36323
-CMD ["python3", "app.py"]
+CMD ["gunicorn", "app:app", "-w 2", "--threads 2", "-b 0:0:0:0:36323"]
