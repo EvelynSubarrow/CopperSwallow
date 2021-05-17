@@ -107,7 +107,7 @@ def locations():
 
     query = app.session.query(DarwinLocation).order_by(DarwinLocation.tiploc.asc())
     if category:
-        query = query.filter(DarwinLocation.category.in_(category))
+        query = query.filter(DarwinLocation.category.in_(list(category)))
 
     if disambiguation:
         stations_by_crs = defaultdict(list)
