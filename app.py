@@ -136,9 +136,20 @@ def locations():
 
 @app.route('/location/<location>')
 def location(location):
-    query = app.session.query(DarwinLocation).filter(DarwinLocation.tiploc==location)
+    query = app.session.query(DarwinLocation).filter(
+        or_(DarwinLocation.tiploc == location, DarwinLocation.crs_darwin == location))
 
-    return flask.render_template("location_nonboard.html", location=query[0])
+    singular_crs = None
+    best_name, best_code = None, None
+    if query.count():
+        singular_crs = query[0].crs_darwin
+        best_name, best_code = query[0].name_full, query[0].tiploc
+        if singular_crs and query.count() > 1:
+            best_name, best_code = query[0].name_darwin, singular_crs
+        elif singular_crs and query.count() == 1:
+            best_code = singular_crs
+
+    return flask.render_template("location_nonboard.html", locations=query, best_name=best_name, best_code=best_code)
 
 
 @app.route('/style')
@@ -247,6 +258,11 @@ def html_location(location, time):
         status=200,
         mimetype="text/html"
     )
+
+@app.route('/j/location')
+def js_locations():
+    return Response(json.dumps([a.serialise(True) for a in app.session.query(DarwinLocation).order_by(DarwinLocation.tiploc)], indent=2, default=query.json_default), mimetype="application/json", status=200)
+
 
 
 @app.route('/location/<location>/arrivals', defaults={"time": "now"})

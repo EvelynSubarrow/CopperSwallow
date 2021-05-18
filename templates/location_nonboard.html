@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block title %}{{ location.tiploc + " " + location.name_full }}{% endblock %}
+{% block title %}{{ best_name }} ({{ best_code }}){% endblock %}
 {% block content %}
         {%- if message -%}
             <section class="message">{{message}}</section>
@@ -21,14 +21,17 @@
                         <th>CRS</th>
                         <th class="borderright">Name</th>
                     </tr>
+                    {%- for location in locations -%}
                     <tr class="{{ "cancelled "*(location.category=="Z")}}">
                         <td class="tiploc borderleft">{{ location.tiploc }}</td>
                         <td class="loc_category">{{ location.category }}</td>
                         <td class="crs">{{ location.crs_darwin or '' }}</td>
                         <td class="locname borderright">{{ location.name_full }}</td>
                     </tr>
+                    {%- endfor -%}
                 </table>
             </section>
+        {%- for location in locations -%}
             <section>
                 <h1>BPLAN - Pathing</h1>
                 <i>Link distances may not be accurate.</i>
@@ -83,4 +86,5 @@
                     {%- endfor -%}
                 </table>
             </section>
+        {%- endfor -%}
 {% endblock %}
