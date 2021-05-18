@@ -1,17 +1,6 @@
 {% extends "layout.html" %}
 {% block title %}{{location}} services on {{time.isoformat()}}{% endblock %}
 {% block content %}
-        {%- if message -%}
-            <section class="message">{{message}}</section>
-        {%- endif -%}
-        {%- if notes -%}
-            <section>
-                <h1>Query messages</h1>
-            {%- for note in notes -%}
-                <div class="note">{{ note }}</div>
-            {%- endfor -%}
-            </section>
-        {% endif %}
         {%- if board["messages"] -%}
             <section>
                 <h1>Darwin messages</h1>
