@@ -1,6 +1,7 @@
 body {
     background-color: #04000b;
     background-image: url(/swallow);
+    background-attachment: fixed;
     background-repeat:no-repeat;
     color: #ddf;
     font-family: monospace;
