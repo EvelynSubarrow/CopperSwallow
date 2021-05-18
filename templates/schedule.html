@@ -1,16 +1,6 @@
 {% extends "layout.html" %}
 {% block title %}{{schedule["uid"]}}{% endblock %}
 {% block content %}
-        {% if message %}
-            <section class="message">{{message}}</section>
-        {% endif %}
-        {% if schedule -%}
-        {% for note in notes %}
-            <section>
-                <h1>Query notes</h1>
-                <div class="note">{{ note }}</div>
-            </section>
-        {% endfor %}
         {%- if schedule["cancel_reason"] or schedule["delay_reason"] -%}
             <section>
                 <h1>Disruption messages</h1>
