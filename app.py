@@ -161,14 +161,14 @@ def style():
 def swallow():
     return app.send_static_file('swallow.svg')
 
+
 @app.route('/main.js')
 def main_js():
     return app.send_static_file('main.js')
 
-@app.route('/json/departures/<location>', defaults={"time": "now"})
-@app.route('/json/departures/<location>/<time>')
-@app.route('/j/d/<location>', defaults={"time": "now"})
-@app.route('/j/d/<location>/<time>')
+
+@app.route('/json/location/<location>/departures', defaults={"time": "now"})
+@app.route('/json/location/<location>/departures/<time>')
 def json_departures(location, time):
     failure_message = None
     status = 200
@@ -335,11 +335,13 @@ def html_service(id, date):
         mimetype="text/html"
         )
 
+
 @app.route("/redirect/schedule")
 def redirect_schedule():
     uid = request.args.get("uid", '')
     date = request.args.get("date", '')
     return flask.redirect(flask.url_for("html_service", id=uid, date=date))
+
 
 @app.route("/redirect/location")
 def redirect_location():
