@@ -71,3 +71,13 @@ def last_retrieved() -> Optional[datetime.datetime]:
     result = app.app.session.query(LastReceivedSequence)
     if result.count():
         return result[0].time_acquired
+
+
+def operator_categories():
+    operator_cats = OrderedDict()
+    operators = app.app.session.query(DarwinOperator).order_by(DarwinOperator.category.desc()).order_by(DarwinOperator.operator)
+    for operator in operators:
+        operator_cats[operator.category] = operator_cats.get(operator.category, [])
+        operator_cats[operator.category].append(operator)
+
+    return operator_cats
