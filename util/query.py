@@ -20,12 +20,11 @@ def json_default(value) -> str:
 
 
 def station_board(location: str, query_dt=None, period: int = 480, limit: int = 50, intermediate_tiploc=None, passenger_only=True, arrivals=False) -> dict:
-    location = location.upper()
     out = OrderedDict()
 
     query_dt_last = query_dt + datetime.timedelta(minutes=period)
-
-    out["locations"] = OrderedDict([(a.tiploc, a.serialise(False)) for a in session_holder.session.query(DarwinLocation).filter(or_(DarwinLocation.crs_darwin==location, DarwinLocation.tiploc==location))])
+    print(repr(location))
+    out["locations"] = OrderedDict([(a.tiploc, a.serialise(False)) for a in session_holder.session.query(DarwinLocation).filter(or_(DarwinLocation.crs_darwin.ilike(location), DarwinLocation.tiploc.ilike(location)))])
 
     # TODO: This structure doesn't accommodate the possibility of mutiple CRS per query, nor for querying by ITPS CRS
     # TODO: Realistically it has to still be its own level to avoid duplication so this might be tricky

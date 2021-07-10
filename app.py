@@ -110,7 +110,8 @@ def json_departures(location, time):
     failure_message = None
     status = 200
     try:
-        if not location.isalnum(): raise ValueError
+        if any(ord(c) < 0x20 for c in location):
+            raise ValueError()
         if time == "now":
             time = datetime.datetime.now()
         else:
@@ -159,7 +160,8 @@ def text_departures(location, time):
     failure_message = None
     status = 200
     try:
-        if not location.isalnum(): raise ValueError
+        if any(ord(c) < 0x20 for c in location):
+            raise ValueError()
         if time == "now":
             time = datetime.datetime.now()
         else:
@@ -189,7 +191,8 @@ def json_service(id, date):
     failure_message = None
     status = 200
     try:
-        if not id.isalnum(): raise ValueError
+        if not id.isalnum():
+            raise ValueError
         if date in ["now", "today"]:
             date = datetime.datetime.now().date()
         elif date!=None:
@@ -217,7 +220,8 @@ def json_service(id, date):
 @app.route('/location/<location>/departures/<time>')
 def html_location(location, time):
     try:
-        if not location.isalnum(): raise ValueError
+        if any(ord(c) < 0x20 for c in location):
+            raise ValueError()
 
         notes = []
 
@@ -251,7 +255,8 @@ def html_location(location, time):
 @app.route('/location/<location>/arrivals/<time>')
 def html_arrivals(location, time):
     try:
-        if not location.isalnum(): raise ValueError
+        if any(ord(c) < 0x20 for c in location):
+            raise ValueError()
 
         notes = []
 
