@@ -140,7 +140,7 @@ def compose_text_response(station_board):
     if station_board["messages"]:
         text += "Messages\n"
         for message in station_board["messages"]:
-            text += f"| {repr(message)}"
+            text += f"| {message['message']}\n"
     text += "Services\n"
     for service in station_board["services"]:
         here = service["here"]
@@ -148,7 +148,7 @@ def compose_text_response(station_board):
         plat = ""
         if here_plat["platform"]:
             plat = "*"*here_plat["suppressed"] + here_plat["platform"] + "."*here_plat["confirmed"]
-        text += f"| {format_time(here, 'dw'):<5} {format_time(here, 'd.'):<5} {plat:<4} {'/'.join([a['name_full'] for a in service['destinations']])}\n"
+        text += f"| {format_time(here, 'dw'):<6} {'CANC' if here['cancelled'] else format_time(here, 'd.'):<6} {plat:<4} {'/'.join([a['name_full'] for a in service['destinations']])}\n"
 
     return text
 
