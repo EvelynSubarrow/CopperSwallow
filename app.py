@@ -131,6 +131,56 @@ def json_departures(location, time):
             status, failure_message = 500, "Unhandled exception"
     return Response(json.dumps({"status": status, "message":failure_message}, indent=2), mimetype="application/json", status=status)
 
+
+def compose_text_response(station_board):
+    text = "Locations\n"
+
+    for location in station_board["locations"].values():
+        text += f"| {location['location_category']} {location['name_full']} ({location['tiploc']} {location['crs_darwin'] or ''})\n"
+    if station_board["messages"]:
+        text += "Messages\n"
+        for message in station_board["messages"]:
+            text += f"| {repr(message)}"
+    text += "Services\n"
+    for service in station_board["services"]:
+        here = service["here"]
+        here_plat = here["platform"]
+        plat = ""
+        if here_plat["platform"]:
+            plat = "*"*here_plat["suppressed"] + here_plat["platform"] + "."*here_plat["confirmed"]
+        text += f"| {format_time(here, 'dw'):<5} {format_time(here, 'd.'):<5} {plat:<4} {'/'.join([a['name_full'] for a in service['destinations']])}\n"
+
+    return text
+
+
+@app.route('/text/location/<location>/departures', defaults={"time": "now"})
+@app.route('/text/location/<location>/departures/<time>')
+def text_departures(location, time):
+    failure_message = None
+    status = 200
+    try:
+        if not location.isalnum(): raise ValueError
+        if time == "now":
+            time = datetime.datetime.now()
+        else:
+            time = datetime.datetime.strptime(time, "%Y-%m-%dT%H:%M:%S")
+
+        response = query.station_board(location, time, period=500)
+
+
+        if response:
+            return Response(compose_text_response(response), mimetype="text/plain", status=status)
+        else:
+            status, failure_message = 404, "Location(s) not found"
+    # except ValueError as e:
+    #     status, failure_message = 400, "Location codes must be alphanumeric, and the only permitted time is 'now'... for now"
+    except Exception as e:
+        logging.exception(e)
+        if not failure_message:
+            status, failure_message = 500, "Unhandled exception"
+    return Response(f"""| {status}: status\n| {failure_message}""", mimetype="text/plain", status=status)
+
+
 @app.route('/json/service/<id>', defaults={"date": None})
 @app.route('/json/service/<id>/<date>')
 @app.route('/j/s/<id>', defaults={"date": None})

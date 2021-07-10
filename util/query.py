@@ -1,10 +1,10 @@
 import datetime
 from typing import Optional
 
+from util import session_holder
 import sqlalchemy.orm
 from sqlalchemy import or_, and_
 
-import app
 from IronSwallowORM.models import *
 
 
@@ -25,16 +25,16 @@ def station_board(location: str, query_dt=None, period: int = 480, limit: int = 
 
     query_dt_last = query_dt + datetime.timedelta(minutes=period)
 
-    out["locations"] = OrderedDict([(a.tiploc, a.serialise(False)) for a in app.app.session.query(DarwinLocation).filter(or_(DarwinLocation.crs_darwin==location, DarwinLocation.tiploc==location))])
+    out["locations"] = OrderedDict([(a.tiploc, a.serialise(False)) for a in session_holder.session.query(DarwinLocation).filter(or_(DarwinLocation.crs_darwin==location, DarwinLocation.tiploc==location))])
 
     # TODO: This structure doesn't accommodate the possibility of mutiple CRS per query, nor for querying by ITPS CRS
     # TODO: Realistically it has to still be its own level to avoid duplication so this might be tricky
     singular_crs = None
     if out["locations"]: singular_crs = list(out["locations"].values())[0]["crs_darwin"]
 
-    out["messages"] = [a.serialise(False) for a in app.app.session.query(DarwinMessage).filter(DarwinMessage.stations.any(singular_crs))]
+    out["messages"] = [a.serialise(False) for a in session_holder.session.query(DarwinMessage).filter(DarwinMessage.stations.any(singular_crs))]
 
-    query = app.app.session.query(DarwinScheduleLocation).join(DarwinScheduleLocation.schedule).options(
+    query = session_holder.session.query(DarwinScheduleLocation).join(DarwinScheduleLocation.schedule).options(
         sqlalchemy.orm.joinedload(DarwinScheduleLocation.schedule)).filter(
         DarwinSchedule.is_deleted == False)
 
@@ -58,7 +58,7 @@ def station_board(location: str, query_dt=None, period: int = 480, limit: int = 
     return out
 
 def service(sid, date=None) -> dict:
-    service = app.app.session.query(DarwinSchedule).filter(
+    service = session_holder.session.query(DarwinSchedule).filter(
         or_(DarwinSchedule.rid == sid,
             and_(DarwinSchedule.uid == sid, DarwinSchedule.ssd == date)
             )
@@ -68,14 +68,14 @@ def service(sid, date=None) -> dict:
 
 
 def last_retrieved() -> Optional[datetime.datetime]:
-    result = app.app.session.query(LastReceivedSequence)
+    result = session_holder.session.query(LastReceivedSequence)
     if result.count():
         return result[0].time_acquired
 
 
 def operator_categories():
     operator_cats = OrderedDict()
-    operators = app.app.session.query(DarwinOperator).order_by(DarwinOperator.category.desc()).order_by(DarwinOperator.operator)
+    operators = session_holder.session.query(DarwinOperator).order_by(DarwinOperator.category.desc()).order_by(DarwinOperator.operator)
     for operator in operators:
         operator_cats[operator.category] = operator_cats.get(operator.category, [])
         operator_cats[operator.category].append(operator)
